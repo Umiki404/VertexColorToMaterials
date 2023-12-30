@@ -18,7 +18,7 @@ bl_info = {
     "author": "Nolca",
     "description": "搭配Plasticity + QuadRemesher使用",
     "blender": (2, 80, 0),
-    "version": (0, 0, 1),
+    "version": (0, 0, 2),
     "location": "View3D > Sidebar > Plasticity",
     "warning": "",
     "category": "Mesh"
@@ -48,6 +48,26 @@ class PLASTICITY_PT_Panel_VC2M(bpy.types.Panel):
         row.operator("materials.convert_to_materials",icon='ORPHAN_DATA')
         row = layout.row()
         row.operator("materials.clear_obj_materials",icon='TRASH')
+        row = layout.row()
+        row.operator("wm.refacet_batch")
+
+class RefacetBatchOperator(bpy.types.Operator):
+    bl_idname = "wm.refacet_batch"
+    bl_label = "批量refacet"
+    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = "选中物体批量重拓扑\nrefacet the selected objects batchly"
+
+    def execute(self, context):
+        selected_objects = bpy.context.selected_objects
+        for obj in selected_objects:
+            if obj.type != 'MESH':
+                continue
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.wm.refacet()
+        return {'FINISHED'}
+
 
 class ConvertMaterialsOperator(bpy.types.Operator):
     bl_idname = "materials.convert_to_materials"
@@ -160,6 +180,7 @@ classes = (
     ConvertMaterialsOperator,
     ClearObjMaterialsOperator,
     VC2M_PropertyGroup,
+    RefacetBatchOperator,
 )
 
 
